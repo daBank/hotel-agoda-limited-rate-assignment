@@ -9,6 +9,18 @@
 - Spring Boot
 - Postgres 
 
+
+<!-- TABLE OF CONTENTS -->
+<details open="open">
+  <summary>Table of Contents</summary>
+  <ol>
+    <li><a href="#setup">Setup</a></li>
+    <li><a href="#endpoints">Endpoints</a></li>
+    <li><a href="#rate-limited-api-solution">Rate-limited API Solution</a></li>
+  </ol>
+</details>
+
+<!-- Setup -->
 ## Setup
 
 #### Installation & Setup
@@ -16,21 +28,28 @@
 1. Download [JDK 11](http://jdk.java.net/archive/) 
 2. Download [Postgres 12](https://www.postgresql.org/download/) 
 3. Open IDE (e.g. IntelliJ)
-4. Setting Java 11: **File** > **Project Structures..** > on Project SDK, click *Edit, and import the downloaded JDK.
+4. Setting JDK 11: **File** > **Project Structures..** > on **Project SDK** section, click **Edit**, and import the downloaded JDK.
 5. Setting up Database and Schema on Postgres.
 
-    5.1 Database: Open the installed **pgAdmin 4** which comes with Postgres installation > Right click on left panel in **Browser** section> **Create** > **Database** > fill `hotelBooking` into **Database** input box.
+    5.1 Database: Open the installed **pgAdmin 4** which comes with Postgres installation > Right click on left panel in **Browser** section > **Create** > **Database** > fill `hotelBooking` into **Database** input box.
     
     5.2 Schema: Expands your created database > Right click **Schemas** > **Create** > **Schema** > fill `svc_hotel` in **Name** input box.
 
     Note: You can change the database and schema name in `src/main/resources/application.properties`.
+        
+    ```
+    schema.name=svc_hotel
+    database.name=hotelBooking
+    ```
+        
 6. Import dependencies in pom.xml by right click the `pom.xml` > **Maven** > **Reload**.
 7. Run `src/main/java/com/hotelbooking/SvcHotelApplication.java`.
-    - The server port is 8080.
+    - The server port is `8080`.
 8. Curl to init data in database: `curl --location --request POST 'localhost:8080/init'`.
     - It'll read data from `src/main/resources/hoteldb.csv` and INSERT into the database.
     - [Database design](https://drive.google.com/file/d/1z6HBKNuGCMV8mIlXoo6vIrmHkaKpKQQZ/view) 
     
+<!-- Endpoints -->
 ## Endpoints
 1. `GET localhost:8080/city`
     - Request Mapping:
@@ -51,7 +70,7 @@
     
     - Example: `GET localhost:8080/room?sort=ASC`.
     
-
+<!-- Rate-limited API Solution -->
 ## Rate-limited API Solution
 
 #### Configuration files
@@ -61,17 +80,17 @@
     
     ```rate-limitting.paths=/city,/room
        
-       rate-limitting.max.requests.default=50
-       rate-limitting.specific-period.default=10
-       
        rate-limitting.max.requests./city=10
        rate-limitting.specific-period./city=5
        
        rate-limitting.max.requests./room=100
        rate-limitting.specific-period./room=10
+  
+       rate-limitting.max.requests.default=50
+       rate-limitting.specific-period.default=10
     ```
   
-    - `rate-limitting.paths` configures the paths (of APIs) that need to do rate limited.
+    - `rate-limitting.paths` configures a list of the paths (of APIs) that need to do rate limited.
     - `rate-limitting.max.requests./city` configures max requests of path `/city`.
        
       `rate-limitting.max.requests./room` configures max requests of path `/room`.
