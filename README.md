@@ -1,18 +1,13 @@
-## Agoda Rate-limited API home assignment
+# Agoda Rate-limited API home assignment
 
 - Agoda Rate-limited API
 - Requirement [Rate_API_2020.pdf](./Rate_API_2020.pdf)
-
-#### Built with
-
-- JDK
-- Spring Boot
-- Postgres 
+- Built with JDK, Spring Boot, Postgres 
 
 
 <!-- TABLE OF CONTENTS -->
 <details open="open">
-  <summary>Table of Contents</summary>
+  <summary/><h3>Table of Contents</h3></summary>
   <ol>
     <li><a href="#setup">Setup</a></li>
     <li><a href="#endpoints">Endpoints</a></li>
