@@ -29,7 +29,7 @@ public class RequestThrottlePerRequestFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
-        String path = httpServletRequest.getServletPath();
+        String path = httpServletRequest.getRequestURI();
         if (isMaximumRequestsExceeded(path)) {
             httpServletResponse.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             httpServletResponse.getWriter().write("Too many requests");
@@ -41,7 +41,7 @@ public class RequestThrottlePerRequestFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
+        String path = request.getRequestURI();
         return !rateLimittingPaths.stream().anyMatch(path::startsWith);
     }
 
@@ -51,11 +51,11 @@ public class RequestThrottlePerRequestFilter extends OncePerRequestFilter {
 
             int requests = rateLimit.getCount();
 
-                log.debug("KEY: {}, CACHE: {}, MAX: {}, BLOCKED:{}", key, requests, rateLimittingMaxRequest.get(key), rateLimit.getBlockRequestUntilDatetime());
+                log.debug("KEY: {}, CACHE: {}, MAX: {}, BLOCKED:{}, EXPIRED: {}", key, requests, rateLimittingMaxRequest.get(key), rateLimit.getBlockRequestUntilDatetime(), rateLimit.getExpiredDatetime());
 
-            if (requests > rateLimittingMaxRequest.get(key)) {
-                log.info("BLOCKING");
+            if (requests >= rateLimittingMaxRequest.get(key)) {
                 rateLimit.blockIncomingRequest();
+                log.info("BLOCKING till {}", rateLimit.getBlockRequestUntilDatetime());
                 return true;
             }
 

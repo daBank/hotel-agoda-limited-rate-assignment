@@ -24,8 +24,15 @@ public class RateLimit {
         return ZonedDateTime.now().compareTo(refreshDatetime.plus(expiredAfterWrite, ChronoUnit.SECONDS)) > 0;
     }
 
+    public ZonedDateTime getExpiredDatetime() {
+        return refreshDatetime.plus(this.expiredAfterWrite, ChronoUnit.SECONDS);
+    }
+
+    public boolean toRefreshRateCount() {
+        return (this.blockRequestUntilDatetime != null && this.blockRequestUntilDatetime.compareTo(ZonedDateTime.now()) < 0) || this.isExpired();
+    }
     public int write(int count) {
-        if (this.isExpired()) {
+        if (this.toRefreshRateCount()) {
 
             this.count = count;
             this.refreshDatetime = ZonedDateTime.now();
@@ -43,7 +50,7 @@ public class RateLimit {
     }
 
     public void blockIncomingRequest() {
-        if (this.blockRequestUntilDatetime == null || this.blockRequestUntilDatetime.compareTo(ZonedDateTime.now()) < 0) {
+        if (this.blockRequestUntilDatetime == null) {
             // If the rate gets higher than the threshold on an endpoint, the API should stop responding for 5
             // seconds on that endpoint ONLY, before allowing other requests
             this.blockRequestUntilDatetime = ZonedDateTime.now().plus(5, ChronoUnit.SECONDS);
@@ -51,7 +58,7 @@ public class RateLimit {
     }
 
     public Integer getCount() {
-        if (isAllowIncomingRequest() && this.isExpired()) {
+        if (this.toRefreshRateCount()) {
             return this.write(0);
         }
         return this.count;

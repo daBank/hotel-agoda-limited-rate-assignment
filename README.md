@@ -108,7 +108,10 @@
             - `refreshDatetime` represents the latest time the **path** is refresh from counting max requests (when reset `count = 0`).
             - `lastAccessDatetime` represents the latest time the `key` is accessed from read or write.
             - `expiredAfterWrite` represents the expired time for each period of the key.
-            - `blockRequestUntilDatetime` represents the end of blocked request access time (default is 5 seconds after the endpoint accessed at over the defined max requests limit).
+            - `blockRequestUntilDatetime` 
+                - represents the end of blocked request access time (default is 5 seconds after the endpoint accessed at over the defined max requests limit).
+                - As the requirement aren't specified that after refresh cache should refresh the rate limiting count on the period or not, 
+                this project refresh counting the rate limiting after block request for 5 seconds.
         - `requestCountsPerPath` 
             - Data type: `ConcurrentHashMap<String, RateLimit>` 
             - keep **path** of the endpoint as key, and the `RateLimit` data model.
@@ -140,3 +143,47 @@
         ```
 
       - If it exceeded the max limit, it'll return `HttpStatus.TOO_MANY_REQUESTS`, Http status 429.
+
+### Integration Tests
+- `HotelRateLimitIntegrationTest.java` contains 6 cases:
+    1. Feature: `/city` returns collect result
+         `/city` return hotels of the input city and I might want to sorted price.
+      
+       Given I retrieve hotels from `/city`
+           When I call `/city`
+           And I specify city name with a specific city name e.g. Bangkok
+           And optionally, I can sort result by price in descending or ascending order
+           Then I should get correctly hotels of the city and price in the correct order
+    2. Feature: `/room` returns collect result
+         `/room` returns all hotels, and I might want to sorted price.
+      
+       Given I retrieve hotels from `/room`
+           When I call `/room`
+           And optionally, I can sort result by price in descending or ascending order
+           Then I should get correctly hotels data with price in the correct order
+    3. Feature: `/city` can stop responding after the limited-rate gets higher than the threshold
+         If the rate gets higher than the threshold on an endpoint, the API should stop responding.
+      
+       Given The `/city` endpoint can receive maximum 10 requests every 5 seconds
+           When I call `/city` at 11st time with 5 seconds
+           Then I should get 429 http status.
+    4. Feature: `/city` can stop responding after the limited-rate gets higher than the threshold
+         If the rate gets higher than the threshold on an endpoint, the API should stop responding for 5 seconds on that endpoint ONLY, before allowing other requests
+      
+       Given The `/city` endpoint can receive maximum 10 requests every 5 seconds.
+           When I call `/city` at 11st time with 5 seconds.
+           Then I should get 429 http status instead of hotel result for 5 seconds.
+           Then I still can successfully call to `/room`.
+    5. Feature: `/city` can unblock stopping responding after 5 seconds
+        If the rate gets higher than the threshold on an endpoint, the API should stop responding for 5 seconds on that endpoint, before allowing other requests.
+        After that, it can receive new requests.
+     
+       Given The `/city` endpoint can receive maximum 10 requests every 5 seconds.
+          When I call `/city` wait after blocking for 5 seconds.
+          Then I successfully send request to `/city`.
+    6. Feature: `/room` can stop responding after the limited-rate gets higher than the threshold.
+        If the rate gets higher than the threshold on an endpoint, the API should stop responding for 5 seconds on that endpoint, before allowing other requests.
+     
+       Given The `/room` endpoint can receive maximum 100 requests every 10 seconds.
+          When I call `/room` at 101st time with 10 seconds.
+          Then I should get 429 http status instead of hotel result ONLY for 5 seconds.
