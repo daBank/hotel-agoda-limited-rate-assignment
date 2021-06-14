@@ -12,6 +12,7 @@
     <li><a href="#setup">Setup</a></li>
     <li><a href="#endpoints">Endpoints</a></li>
     <li><a href="#rate-limited-api-solution">Rate-limited API Solution</a></li>
+    <li><a href="#integration-tests">Integration Tests</a></li>
   </ol>
 </details>
 
@@ -144,7 +145,7 @@
 
       - If it exceeded the max limit, it'll return `HttpStatus.TOO_MANY_REQUESTS`, Http status 429.
 
-### Integration Tests
+## Integration Tests
 - `HotelRateLimitIntegrationTest.java` contains 6 cases:
     1. Feature: `/city` returns collect result
          `/city` return hotels of the input city and I might want to sorted price.
