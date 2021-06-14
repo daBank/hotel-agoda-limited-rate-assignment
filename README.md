@@ -7,7 +7,7 @@
 
 <!-- TABLE OF CONTENTS -->
 <details open="open">
-  <summary><h3>Table of Contents</h3></summary>
+  <summary><b>Table of Contents</b></summary>
   <ol>
     <li><a href="#setup">Setup</a></li>
     <li><a href="#endpoints">Endpoints</a></li>
